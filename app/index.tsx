@@ -1,15 +1,134 @@
-import { Text, View } from "react-native";
 
-export default function Index() {
+import { useAuth } from '@/lib/auth-context'
+import { useRouter } from 'expo-router'
+import React, { useState } from 'react'
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native'
+import { Button, Text, TextInput, useTheme } from 'react-native-paper'
+
+const AuthScreen = () => {
+  const [isSignUp, setIsSignUp] = useState<boolean>(false)
+  const [email, setEmail] = useState<string>("")
+  const [password, setPassword] = useState<string>("")
+  const [error, setError] = useState<string | null>(null)
+
+  const theme = useTheme()
+  const router = useRouter()
+
+  const { signIn, signUp } = useAuth()
+
+  const handleAuth = async () => {
+    if (!email || !password) {
+      setError("Please fill all fields")
+      return
+    }
+
+    if (password.length < 6) {
+      setError("Passwords must be at least 6 characters long.")
+      return
+    }
+
+    setError(null)
+
+    if(isSignUp) {
+      const error = await signUp(email, password)
+
+      if (error) {
+        setError(error)
+        return
+      }
+
+      // router.replace("/")
+    }
+    else {
+      const error = await signIn(email, password)
+
+      if (error) {
+        setError(error)
+        return
+      }
+
+      console.log("Success")
+      // router.replace("/")
+    }
+  }
+
+  const handleSwitchMode = () => {
+    setIsSignUp((prev) => !prev)
+    setError(null)
+  }
+
+
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
     >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
-    </View>
-  );
+      <View style={styles.content}>
+        <Text variant='headlineMedium' style={styles.title}>
+           { isSignUp ? "Create Account" : "Welcome Back!" } 
+        </Text>
+
+        <TextInput 
+          mode='outlined'
+          style={styles.input}
+          label={"Email"}
+          onChangeText={setEmail}
+          autoCapitalize='none'
+          autoCorrect={false}
+          textContentType='emailAddress'
+        />
+
+        <TextInput 
+          mode='outlined'
+          style={styles.input}
+          secureTextEntry
+          label={"Password"}
+          onChangeText={setPassword}
+          autoCapitalize='none'
+          autoCorrect={false}
+          textContentType='password'
+        />
+
+        { error && <Text style={styles.error}> { error } </Text>}
+
+        <Button mode='contained' style={styles.button} onPress={handleAuth}>
+          { isSignUp ? "Sign up" : "Sign in"}
+        </Button>
+
+        <Button mode='text' textColor='black' onPress={handleSwitchMode}>
+          { isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
+        </Button>
+      </View>
+    </KeyboardAvoidingView>
+  )
 }
+
+export default AuthScreen
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  content: {
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: 25,
+    borderWidth: 1
+  },
+  title: {
+    marginBottom: 20,
+    textAlign: "center"
+  },
+  input: {
+    height: 40,
+    marginBottom: 20,
+  },
+  button: {
+    marginTop: 20,
+  },
+  error: {
+    color: "red",
+    textAlign: "center",
+  }
+})
