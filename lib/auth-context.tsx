@@ -44,7 +44,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
                 return error.message
             }
 
-            return "Am error occured during sign up"
+            return "An error occured during sign up"
         }
     }
 

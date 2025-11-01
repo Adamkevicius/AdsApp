@@ -3,7 +3,7 @@ import { useAuth } from '@/lib/auth-context'
 import { useRouter } from 'expo-router'
 import React, { useState } from 'react'
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native'
-import { Button, Text, TextInput, useTheme } from 'react-native-paper'
+import { Button, Text, TextInput } from 'react-native-paper'
 
 const AuthScreen = () => {
   const [isSignUp, setIsSignUp] = useState<boolean>(false)
@@ -11,7 +11,6 @@ const AuthScreen = () => {
   const [password, setPassword] = useState<string>("")
   const [error, setError] = useState<string | null>(null)
 
-  const theme = useTheme()
   const router = useRouter()
 
   const { signIn, signUp } = useAuth()
@@ -37,7 +36,7 @@ const AuthScreen = () => {
         return
       }
 
-      // router.replace("/")
+      router.replace("/")
     }
     else {
       const error = await signIn(email, password)
@@ -47,8 +46,7 @@ const AuthScreen = () => {
         return
       }
 
-      console.log("Success")
-      // router.replace("/")
+      router.replace("/")
     }
   }
 
@@ -64,14 +62,15 @@ const AuthScreen = () => {
       style={styles.container}
     >
       <View style={styles.content}>
-        <Text variant='headlineMedium' style={styles.title}>
+        <Text variant='headlineLarge' style={styles.title}>
            { isSignUp ? "Create Account" : "Welcome Back!" } 
         </Text>
 
         <TextInput 
           mode='outlined'
-          style={styles.input}
           label={"Email"}
+          activeOutlineColor='#466145'
+          style={styles.input}
           onChangeText={setEmail}
           autoCapitalize='none'
           autoCorrect={false}
@@ -79,10 +78,11 @@ const AuthScreen = () => {
         />
 
         <TextInput 
-          mode='outlined'
+          mode="outlined"
+          label="Password"
+          activeOutlineColor='#466145'
           style={styles.input}
           secureTextEntry
-          label={"Password"}
           onChangeText={setPassword}
           autoCapitalize='none'
           autoCorrect={false}
@@ -108,7 +108,7 @@ export default AuthScreen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#ECE39D",
   },
   content: {
     flex: 1,
@@ -117,14 +117,16 @@ const styles = StyleSheet.create({
     borderWidth: 1
   },
   title: {
-    marginBottom: 20,
+    marginBottom: 70,
     textAlign: "center"
   },
   input: {
     height: 40,
+    borderColor: "#D8DAA7",
     marginBottom: 20,
   },
   button: {
+    backgroundColor: "#577A56",
     marginTop: 20,
   },
   error: {

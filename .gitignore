@@ -30,7 +30,7 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# Environment variables
+# env files
 .env
 .env.*
 
