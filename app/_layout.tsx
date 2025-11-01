@@ -1,34 +1,47 @@
-import { AuthProvider } from "@/lib/auth-context";
-import { Stack } from "expo-router";
+import { AuthProvider, useAuth } from "@/lib/auth-context";
+import { Stack, useRouter, useSegments } from "expo-router";
+import { ReactNode, useEffect, useState } from "react";
+import { PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-// const RouteGuard = ({children}: {children: ReactNode}) => {
-//   const router = useRouter()
-//   const { user, isLoadingUser } = useAuth()
-//   const segments = useSegments()
+const RouteGuard = ({children}: {children: ReactNode}) => {
 
-//   useEffect(() => {
-//     const inAuthGroup = segments[0] === "auth"
+  const router = useRouter()
+  const [ready, setReady] = useState(false)
+  const { user, isLoadingUser } = useAuth()
+  const segments = useSegments()
 
-//     if (!user && !inAuthGroup && !isLoadingUser) {
-//       router.replace('/auth')
-//     }
-//     else if (user && inAuthGroup && !isLoadingUser) {
-//       console.log("Authenticated")
-//       // router.replace('/')
-//     }
-//   }, [user, segments, router])
+  useEffect(() => {
+    setReady(true)
+  }, [])
+  
+  useEffect(() => {
+    const inAuthGroup = segments[0] === "auth"
+    if (ready && !user && !inAuthGroup && !isLoadingUser) {
+      router.replace('/auth')
+    }
+    else if (user && inAuthGroup && !isLoadingUser) {
+      router.replace("/")
+    }
+  }, [ready, user, segments, router])
 
-//   return <> {children} </>
-// }
+  if (!ready) return null
+
+  return <>{children}</>
+}
 
 export default function RootLayout() {
   return (
     <AuthProvider>
       <SafeAreaProvider>
-        <Stack>
-          <Stack.Screen name="index" options={{headerShown: false}} />
-        </Stack>
+        <PaperProvider>
+            <RouteGuard>
+              <Stack>
+                <Stack.Screen name="auth" options={{headerShown: false}} />
+                <Stack.Screen name="(tabs)" options={{headerShown: false}} />
+              </Stack>
+            </RouteGuard>
+        </PaperProvider>
       </SafeAreaProvider>
     </AuthProvider>
   );
