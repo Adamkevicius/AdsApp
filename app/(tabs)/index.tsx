@@ -1,17 +1,22 @@
-import { useAuth } from '@/lib/auth-context'
 import React from 'react'
-import { StyleSheet, View } from 'react-native'
-import { Button } from 'react-native-paper'
+import { KeyboardAvoidingView, Platform, StyleSheet } from 'react-native'
 
 const MainPage = () => {
-  const { signOut } = useAuth()
   return (
-    <View>
-      <Button onPress={signOut}>Sign out</Button>
-    </View>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+    </KeyboardAvoidingView>
   )
 }
 
 export default MainPage
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: "#eee6a9ff"
+  }
+})

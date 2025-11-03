@@ -108,7 +108,7 @@ export default AuthScreen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ECE39D",
+    backgroundColor: "#eee6a9ff",
   },
   content: {
     flex: 1,
