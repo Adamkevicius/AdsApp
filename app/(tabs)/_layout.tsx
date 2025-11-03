@@ -1,12 +1,13 @@
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { Pressable, StyleSheet } from 'react-native';
 
 const TabsLayout = () => {
   return (
     <Tabs
     screenOptions={{
-        headerStyle: { backgroundColor: "#f5f5f5" },
+        headerStyle: { backgroundColor: "#eee6a9ff" },
         headerShadowVisible: false,
         tabBarStyle: {
             backgroundColor: "#FDFDFB",
@@ -19,6 +20,12 @@ const TabsLayout = () => {
             name="index" 
             options={{
                 title: "Advertisments",
+                headerTitleStyle: styles.tabBarTitle,
+                headerRight: () => (
+                <Pressable style={styles.tabBarButton}>
+                    <Ionicons name="log-out-outline" size={24} color="black" />
+                </Pressable>
+            ),
                 tabBarIcon: ({ color, size }) => (
                     <MaterialCommunityIcons
                         name='advertisements'
@@ -28,10 +35,17 @@ const TabsLayout = () => {
                 )
             }}
         />
+        
         <Tabs.Screen 
             name="create-ad"
             options={{
-                title: "Post ad",
+                title: "Post an Ad",
+                headerTitleStyle: styles.tabBarTitle,
+                headerRight: () => (
+                <Pressable style={styles.tabBarButton}>
+                    <Ionicons name="log-out-outline" size={24} color="black" />
+                </Pressable>
+            ),
                 tabBarIcon: ({ color, size }) => (
                     <MaterialIcons 
                         name='post-add'
@@ -47,3 +61,13 @@ const TabsLayout = () => {
 }
 
 export default TabsLayout
+
+const styles = StyleSheet.create ({
+    tabBarTitle: {
+        fontSize: 24,
+        fontWeight: "bold"
+    },
+    tabBarButton: {
+        marginRight: 25
+    }
+})
