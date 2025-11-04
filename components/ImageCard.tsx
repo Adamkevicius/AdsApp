@@ -20,12 +20,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   image: {
-    resizeMode: "contain",
+    resizeMode: "cover",
     width: 100,
     height: 100,
-    borderRadius: 10,
+    borderRadius: 5,
     backgroundColor: "#D3D3D3",
-    padding: 10,
+    padding: 15,
     marginHorizontal: 5,
     
   }

@@ -1,20 +1,22 @@
+import { useAuth } from '@/lib/auth-context';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 
 const TabsLayout = () => {
+    const { signOut } = useAuth()
   return (
     <Tabs
-    screenOptions={{
-        headerStyle: { backgroundColor: "#eee6a9ff" },
-        headerShadowVisible: false,
-        tabBarStyle: {
-            backgroundColor: "#FDFDFB",
-        },
-        tabBarActiveTintColor: "#379534ff",
-        tabBarInactiveTintColor: "#6C7A63"
-    }}
+        screenOptions={{
+            headerStyle: { backgroundColor: "#eee6a9ff" },
+            headerShadowVisible: false,
+            tabBarStyle: {
+                backgroundColor: "#FDFDFB",
+            },
+            tabBarActiveTintColor: "#379534ff",
+            tabBarInactiveTintColor: "#6C7A63"
+        }}
     >
         <Tabs.Screen 
             name="index" 
@@ -22,7 +24,7 @@ const TabsLayout = () => {
                 title: "Advertisments",
                 headerTitleStyle: styles.tabBarTitle,
                 headerRight: () => (
-                <Pressable style={styles.tabBarButton}>
+                <Pressable style={styles.tabBarButton} onPress={signOut}>
                     <Ionicons name="log-out-outline" size={24} color="black" />
                 </Pressable>
             ),
@@ -42,7 +44,7 @@ const TabsLayout = () => {
                 title: "Post an Ad",
                 headerTitleStyle: styles.tabBarTitle,
                 headerRight: () => (
-                <Pressable style={styles.tabBarButton}>
+                <Pressable style={styles.tabBarButton} onPress={signOut}>
                     <Ionicons name="log-out-outline" size={24} color="black" />
                 </Pressable>
             ),
