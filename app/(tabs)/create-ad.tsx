@@ -19,7 +19,6 @@ const CreateAdvertisment = () => {
   const [error, setError] = useState<string | null>("")
   const { user } = useAuth()
   const router = useRouter()
-  const pickedImages: string[] = []
 
     let currencyData = [
     {label: "€", value: "€"},
@@ -28,6 +27,8 @@ const CreateAdvertisment = () => {
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+    const pickedImages: string[] = []
+
 
     if (status !== "granted") {
       Alert.alert(
