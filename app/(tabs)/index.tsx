@@ -1,53 +1,102 @@
-import { CLASSIFIED_ADS_COLLECTION_ID, databases, DB_ID } from '@/lib/appwrite'
+import { BUCKET_ID, CLASSIFIED_ADS_COLLECTION_ID, client, databases, DB_ID, RealTimeResponse, storage } from '@/lib/appwrite'
+import { useAuth } from '@/lib/auth-context'
 import { ClassifiedAds } from '@/types/database.type'
 import { MaterialIcons } from '@expo/vector-icons'
 import React, { useEffect, useState } from 'react'
-import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native'
-import { Text } from 'react-native-paper'
+import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'react-native'
+import { Searchbar, Text } from 'react-native-paper'
 
 const MainPage = () => {
-  const [classifiedAds, setClassifiedAds] = useState<ClassifiedAds[]>()
+  const [classifiedAds, setClassifiedAds] = useState<ClassifiedAds[]>([])
+  const [classifiedAdsImages, setClassifiedAdsImages] = useState<string[]>([])
+  const [search, setSearch] = useState<string>("")
+  const { user } = useAuth()
 
   useEffect(() => {
-    fetchClassifiedAds()
-  }, [])
+    if (user) {
+      const channel = `databases.${DB_ID}.collections.${CLASSIFIED_ADS_COLLECTION_ID}.documents`
+      const subscription = client.subscribe(
+        channel,
+        (response: RealTimeResponse) => {
+          if (response.events.includes("databases.*.collections.*.documents.*.create")) {
+            fetchClassifiedAds()
+          }
+          else if (response.events.includes("databases.*.collections.*.documents.*.update")) {
+            fetchClassifiedAds()
+          }
+          else if (response.events.includes("databases.*.collections.*.documents.*.delete")) {
+            fetchClassifiedAds()
+          }
+        }
+      )
+
+      fetchClassifiedAds()
+
+      return () => {
+        subscription()
+      }
+    }
+  }, [user])
+
 
   const fetchClassifiedAds = async () => {
     try {
-      const response = await databases.listDocuments(
-        DB_ID,
-        CLASSIFIED_ADS_COLLECTION_ID,
-      )
-      setClassifiedAds(response.documents as unknown as ClassifiedAds[])
+      const response = await databases.listDocuments(DB_ID, CLASSIFIED_ADS_COLLECTION_ID)
+      const ads = response.documents as unknown as ClassifiedAds[]
+      setClassifiedAds(ads)
+
+      const firstImageId = ads.map(ad => ad.images[0])
+
+      const fetchedImages = await fetchImages(firstImageId)
+
+      setClassifiedAdsImages(fetchedImages)
     } catch (error) {
       console.log(error)
     }
   }
+
+  const fetchImages = async (imgIds: string[]) => {
+    try {
+      const imagePromises = imgIds.map(id =>
+        storage.getFileViewURL(BUCKET_ID, id).href
+      )
+
+      return await Promise.all(imagePromises)
+    } catch (error) {
+      console.log(error)
+      return []
+    }
+  }
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <ScrollView style={{ flex: 1, paddingVertical: 25}}>
-        {classifiedAds?.length === 0 ? (
-        <Text>No classified ads yet.</Text>
-      ) : (
-        classifiedAds?.map((item, key) => (
-          <Pressable style={styles.adContainer} key={key}>
-            {item.images.length === 0 ? (
-            <Image style={styles.image} source={require('/Users/matvej/VSCode Projects/AdsApp/assets/images/empty-image.jpg')}/>
-            ) : (
-              <Image style={styles.image} source={ { uri: item.images[0] } }/> 
-            )}
+      <Searchbar placeholder='Search' style={styles.search} onChangeText={setSearch} value={search} />
+      <FlatList 
+        style={{ flex: 1, paddingVertical: 25}}
+        data={classifiedAds}
+        keyExtractor={item => item.$id}
+        renderItem={({item, index}) => (
+          <Pressable style={styles.adContainer}>
+            <Image style={styles.image} 
+              source={
+                classifiedAdsImages[index]
+                  ? { uri: classifiedAdsImages[index] }
+                  : require('../../assets/images/empty-image.jpg')
+              }
+            />
             <View style={styles.textContainer}>
-              <Text style={styles.title}>{ item.title }</Text>
-              <Text style={styles.price}>{ item.price }</Text>
+              <Text style={styles.title}> {item.title} </Text>
+              <Text style={styles.price}> {item.price} </Text>
+              <MaterialIcons style={styles.arrow} name="arrow-forward-ios" size={24} color="black" />
             </View>
-            <MaterialIcons style={styles.arrow} name="arrow-forward-ios" size={24} color="black" />
-        </Pressable>
-        ))
-      )}
-      </ScrollView>
+          </Pressable>
+        )}
+        ListEmptyComponent={<Text>No classified ads yet.</Text>}
+        showsVerticalScrollIndicator={false}
+      />
     </KeyboardAvoidingView>
   )
 }
@@ -71,9 +120,10 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   textContainer: {
+    flex: 1,
     flexDirection: 'column',
-    width: 150,
-    maxWidth: 150,
+    position: 'relative',
+    maxWidth: 180,
     maxHeight: 100,
     marginLeft: 30,
   },
@@ -86,14 +136,26 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold'
+    maxWidth: 150,
+    maxHeight: 70,
+    fontWeight: 'bold',
+    textAlign: 'left'
   },
   price: {
-    marginTop: 50,
-    color: "#16b919ff"
+    position: 'absolute',
+    marginTop: 80,
+    color: "#16b919ff",
   },
   arrow: {
+    position: 'absolute',
     alignSelf: 'center',
-    left: 15,
+    marginTop: 40,
+    marginLeft: 140,
+    left: 20,
+    fontSize: 20
   },
+  search: {
+    marginTop: 25,
+    marginBottom: 10
+  }
 })
