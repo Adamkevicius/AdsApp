@@ -1,5 +1,5 @@
 import ImageCard from "@/components/ImageCard";
-import { CLASSIFIED_ADS_COLLECTION_ID, databases, DB_ID } from "@/lib/appwrite";
+import { BUCKET_ID, CLASSIFIED_ADS_COLLECTION_ID, databases, DB_ID, storage } from "@/lib/appwrite";
 import { useAuth } from "@/lib/auth-context";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
@@ -10,17 +10,16 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { Button, TextInput } from 'react-native-paper';
 
 
-
-
 const CreateAdvertisment = () => {
   const [title, setTitle] = useState<string>("")
   const [description, setDescription] = useState<string>("")
   const [price, setPrice] = useState<string>("")
   const [currency, setCurrency] = useState<string>("€")
-  const [images, setImages] = useState<string[] | null>()
-  const [error, setError] = useState<string | null>()
+  const [images, setImages] = useState<string[]>([])
+  const [error, setError] = useState<string | null>("")
   const { user } = useAuth()
   const router = useRouter()
+  const pickedImages: string[] = []
 
     let currencyData = [
     {label: "€", value: "€"},
@@ -44,22 +43,52 @@ const CreateAdvertisment = () => {
       })
 
       if(!result.canceled) {
-        const choosenImages: string[] = []
         for (let i = 0; i < result.assets.length; i++) {
-          choosenImages.push(result.assets[i].uri)
+          pickedImages.push(result.assets[i].uri)
         }
-        setImages(choosenImages)
 
-        console.log(choosenImages)
-
+        setImages(pickedImages)
         setError(null)
       }
     }
   }
 
+  const storeImages = async () => {
+    if (images.length === 0) return
+
+    const numberOfImages = images.length
+    const uploadedImagesIds = []
+
+    for (let i = 0; i< numberOfImages; i++) {
+      try {
+        const uploadImage = await storage.createFile(
+          BUCKET_ID,
+          ID.unique(),
+          {
+            name: 'image.jpg',
+            type: 'image/jpeg',
+            size: 1234567,
+            uri: images[i]
+          }
+        )
+
+        uploadedImagesIds.push(uploadImage.$id)
+      } catch (error) {
+        Alert.alert(
+          "Failed",
+          "Failed to upload images."
+        )
+      }
+    }
+
+    return uploadedImagesIds
+  }
+
   const handlePost = async () => {
     try {
       if (!user) return
+
+      var imagesIds = await storeImages()
 
       await databases.createDocument(
         DB_ID,
@@ -70,14 +99,9 @@ const CreateAdvertisment = () => {
           title,
           description,
           price: price + currency,
-          images
+          images: imagesIds
         }
       )
-
-      console.log(title)
-      console.log(description)
-      console.log(price)
-      console.log(images)
 
       router.back()
     } catch (error) {
@@ -88,6 +112,11 @@ const CreateAdvertisment = () => {
 
       setError("There was an error occured while creating classified ads.")
     }
+
+    setTitle("")
+    setDescription("")
+    setPrice("")
+    setImages([])
   }
 
   return (
@@ -103,6 +132,7 @@ const CreateAdvertisment = () => {
           textColor="#000000"
           outlineColor="#f2efefff"
           activeOutlineColor='#466145'
+          value={title}
           onChangeText={setTitle}
         />
         
@@ -114,6 +144,7 @@ const CreateAdvertisment = () => {
           style={styles.descriptionInput}
           outlineColor="#f2efefff"
           activeOutlineColor='#466145'
+          value={description}
           onChangeText={setDescription}
         />
 
@@ -125,6 +156,7 @@ const CreateAdvertisment = () => {
             style={styles.priceInput}
             outlineColor="#f2efefff"
             activeOutlineColor='#466145'
+            value={price}
             onChangeText={setPrice}
           />
           <Dropdown 
@@ -147,15 +179,15 @@ const CreateAdvertisment = () => {
               <ImageCard key={index} uri={uri} />
             ))}
           </ScrollView>
-        ): (
+        ) : (
           <Text style={styles.error}> {error} </Text>
         )}
 
-        <Button mode="text" textColor="#000000" onPress={pickImage}>
+        <Button mode="text" textColor="#000000" style={images.length === 0 ? {marginTop: -33} : {marginTop: 0}} onPress={pickImage}>
           Choose image
         </Button>
 
-        <Button mode='contained' textColor="#FDFDFB" style={styles.button} onPress={handlePost}>Post</Button>        
+        <Button mode='contained' textColor="#FDFDFB" style={styles.button} onPress={handlePost}>Post</Button>    
       </View>
     </KeyboardAvoidingView>
   )
@@ -206,6 +238,7 @@ const styles = StyleSheet.create({
   },  
   imagesContainer: {
     backgroundColor: "#FDFDFB",
+    // height: 100,
     marginTop: 25,
     borderRadius: 5,
     padding: 15,
