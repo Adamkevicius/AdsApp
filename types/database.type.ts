@@ -6,4 +6,5 @@ export interface ClassifiedAds extends Models.Document {
     description: string,
     price: string,
     images: string[],
+    contacts: string
 }

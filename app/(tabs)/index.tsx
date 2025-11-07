@@ -2,6 +2,7 @@ import { BUCKET_ID, CLASSIFIED_ADS_COLLECTION_ID, client, databases, DB_ID, Real
 import { useAuth } from '@/lib/auth-context'
 import { ClassifiedAds } from '@/types/database.type'
 import { MaterialIcons } from '@expo/vector-icons'
+import { router } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'react-native'
 import { Searchbar, Text } from 'react-native-paper'
@@ -79,7 +80,7 @@ const MainPage = () => {
         data={classifiedAds}
         keyExtractor={item => item.$id}
         renderItem={({item, index}) => (
-          <Pressable style={styles.adContainer}>
+          <Pressable style={styles.adContainer} onPress={() => router.push(`/ad-details/${item.$id}`)}>
             <Image style={styles.image} 
               source={
                 classifiedAdsImages[index]
