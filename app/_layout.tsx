@@ -39,6 +39,16 @@ export default function RootLayout() {
               <Stack>
                 <Stack.Screen name="auth" options={{headerShown: false}} />
                 <Stack.Screen name="(tabs)" options={{headerShown: false}} />
+                <Stack.Screen 
+                  name="ad-details/[id]" 
+                  options={{
+                    headerShown: true,
+                    headerShadowVisible: false,
+                    headerStyle: { backgroundColor: "#eee6a9ff" },
+                    headerTitle: "",
+                    headerBackButtonDisplayMode: 'generic'
+                  }} 
+                />
               </Stack>
             </RouteGuard>
         </PaperProvider>

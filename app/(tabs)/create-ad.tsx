@@ -16,6 +16,7 @@ const CreateAdvertisment = () => {
   const [price, setPrice] = useState<string>("")
   const [currency, setCurrency] = useState<string>("€")
   const [images, setImages] = useState<string[]>([])
+  const [contacts, setContacts] = useState<string>("")
   const [error, setError] = useState<string | null>("")
   const { user } = useAuth()
   const router = useRouter()
@@ -100,7 +101,8 @@ const CreateAdvertisment = () => {
           title,
           description,
           price: price + currency,
-          images: imagesIds
+          images: imagesIds,
+          contacts: contacts
         }
       )
 
@@ -118,6 +120,7 @@ const CreateAdvertisment = () => {
     setDescription("")
     setPrice("")
     setImages([])
+    setContacts("")
   }
 
   return (
@@ -142,6 +145,8 @@ const CreateAdvertisment = () => {
           mode='outlined' 
           label={"Description"} 
           textColor="#000000"
+          multiline={true}
+          numberOfLines={8}
           style={styles.descriptionInput}
           outlineColor="#f2efefff"
           activeOutlineColor='#466145'
@@ -188,6 +193,17 @@ const CreateAdvertisment = () => {
           Choose image
         </Button>
 
+        <TextInput 
+          mode='outlined' 
+          label={"Contacts"} 
+          style={[styles.input, {marginTop: 25}]}
+          textColor="#000000"
+          outlineColor="#f2efefff"
+          activeOutlineColor='#466145'
+          value={contacts}
+          onChangeText={setContacts}
+        />
+
         <Button mode='contained' textColor="#FDFDFB" style={styles.button} onPress={handlePost}>Post</Button>    
       </View>
     </KeyboardAvoidingView>
@@ -200,7 +216,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: "#eee6a9ff"
+    backgroundColor: "#eee6a9ff",
   },
   content: {
     padding: 25,
@@ -208,16 +224,16 @@ const styles = StyleSheet.create({
   input: {
     height: 40,
     backgroundColor: "#FDFDFB",
-    marginBottom: 25,
+    marginBottom: 10,
   },
   descriptionInput: {
     height: 150,
     backgroundColor: "#FDFDFB",
-    marginBottom: 25  
+    marginBottom: 10  
   },
   button: {
     backgroundColor: "#577A56",
-    marginTop: 25,
+    marginTop: 10,
     fontWeight: "bold"
   },
   priceContainer: {
