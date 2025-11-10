@@ -136,6 +136,32 @@ const MainPage = () => {
       return filteredImagesIds
   }
 
+  const handleSearch = () => {
+
+    classifiedAds.forEach(async item => {
+      if (search.match(item.title)) {
+        const foundItems = classifiedAds.filter(ads => ads.title.match(search))
+
+        const imagesFirstIds = await getImageFirstId(foundItems)
+
+        setFilteredAds(foundItems)
+        setClassifiedAdsImages(imagesFirstIds)
+      }
+    })
+  }
+
+  const handleText = async (text: string) => {
+    setSearch(text)
+
+    if (text.trim() === "") {
+      const imagesFirstIds = await getImageFirstId(classifiedAds)
+
+      setFilteredAds(classifiedAds)
+      setClassifiedAdsImages(imagesFirstIds)
+
+    }
+  }
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -147,7 +173,7 @@ const MainPage = () => {
           </View>
       ) : (
           <View style={{ height: "100%"}}>
-            <Searchbar placeholder='Search' style={styles.search} onChangeText={setSearch} value={search} />
+            <Searchbar placeholder='Search' style={styles.search} onChangeText={handleText} onSubmitEditing={handleSearch} value={search}/>
             <FlatList 
               style={{ flex: 1}}
               data={filteredAds}
