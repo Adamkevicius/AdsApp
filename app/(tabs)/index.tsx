@@ -2,10 +2,11 @@ import AnimatedCircularProgressBar from '@/components/AnimatedCircularProgressBa
 import { BUCKET_ID, CLASSIFIED_ADS_COLLECTION_ID, client, databases, DB_ID, RealTimeResponse, storage } from '@/lib/appwrite'
 import { useAuth } from '@/lib/auth-context'
 import { ClassifiedAds } from '@/types/database.type'
-import { MaterialIcons } from '@expo/vector-icons'
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'react-native'
+import { Dropdown } from 'react-native-element-dropdown'
 import { Searchbar, Text } from 'react-native-paper'
 
 const MainPage = () => {
@@ -13,7 +14,16 @@ const MainPage = () => {
   const [classifiedAdsImages, setClassifiedAdsImages] = useState<string[]>([])
   const [search, setSearch] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [filter, setFilter] = useState<string>("")
+  const [filteredAds, setFilteredAds] = useState<ClassifiedAds[]>([])
   const { user } = useAuth()
+
+  const dropDownData = [
+    { label: "Show my", value: "Show my" },
+    { label: "Show all", value: "Show all" },
+    { label: "Oldest", value: "Oldest" },
+    { label: "Newest", value: "Newest" },
+  ]
 
   useEffect(() => {
     const init = async () => {
@@ -24,20 +34,18 @@ const MainPage = () => {
         const subscription = client.subscribe(
           channel,
           (response: RealTimeResponse) => {
-            if (response.events.includes("databases.*.collections.*.documents.*.create")) {
-              fetchClassifiedAds()
-            }
-            else if (response.events.includes("databases.*.collections.*.documents.*.update")) {
-              fetchClassifiedAds()
-            }
-            else if (response.events.includes("databases.*.collections.*.documents.*.delete")) {
+            if (
+              response.events.includes("databases.*.collections.*.documents.*.create") || 
+              response.events.includes("databases.*.collections.*.documents.*.update") || 
+              response.events.includes("databases.*.collections.*.documents.*.delete")) 
+            {
               fetchClassifiedAds()
             }
           }
         )
 
        fetchClassifiedAds()
-
+       filterItems()
        return () => {
           subscription()
         }
@@ -48,6 +56,10 @@ const MainPage = () => {
     
   }, [user])
 
+  useEffect(() => {
+    filterItems()
+  }, [filter, classifiedAds])
+
 
   const fetchClassifiedAds = async () => {
     try {
@@ -55,11 +67,9 @@ const MainPage = () => {
       const ads = response.documents as unknown as ClassifiedAds[]
       setClassifiedAds(ads)
 
-      const firstImageId = ads.map(ad => ad.images[0])
+      const imagesFirstIds = await getImageFirstId(ads)
 
-      const fetchedImages = await fetchImages(firstImageId)
-
-      setClassifiedAdsImages(fetchedImages)
+      setClassifiedAdsImages(imagesFirstIds)
 
       setIsLoading(false)
     } catch (error) {
@@ -80,6 +90,52 @@ const MainPage = () => {
     }
   }
 
+  const filterItems = async () => {
+    if (filter === "Show my") {
+      const filteredItems = classifiedAds.filter(item => item.user_id === user?.$id)
+
+      const imagesFirstIds = await getImageFirstId(filteredItems)
+
+      setFilteredAds(filteredItems)
+      setClassifiedAdsImages(imagesFirstIds)
+    }
+    else if (filter === "Show all") {
+      setFilteredAds(classifiedAds)
+
+      const imagesFirstIds = await getImageFirstId(classifiedAds)
+
+      setClassifiedAdsImages(imagesFirstIds)
+
+    }
+    else if (filter === "Oldest") {
+      const sortedItems = [...classifiedAds].sort((a, b) => new Date(a.$createdAt).getTime() - new Date(b.$createdAt).getTime())
+
+      const imagesFirstIds = await getImageFirstId(sortedItems)
+
+      setFilteredAds(sortedItems)
+      setClassifiedAdsImages(imagesFirstIds)
+    }
+    else if (filter === "Newest") {
+      const sortedItems = [...classifiedAds].sort((a, b) => new Date(b.$createdAt).getTime() - new Date(a.$createdAt).getTime())
+      
+      const imagesFirstIds = await getImageFirstId(sortedItems)
+
+      setFilteredAds(sortedItems)
+      setClassifiedAdsImages(imagesFirstIds)
+    }
+    else {
+      setFilteredAds(classifiedAds)
+    }
+  }
+
+  const getImageFirstId = async (imagesArray: ClassifiedAds[]) => {
+    const firstImageId = imagesArray.map(ad => ad.images[0])
+
+      const filteredImagesIds = await fetchImages(firstImageId) 
+
+      return filteredImagesIds
+  }
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -94,7 +150,7 @@ const MainPage = () => {
             <Searchbar placeholder='Search' style={styles.search} onChangeText={setSearch} value={search} />
             <FlatList 
               style={{ flex: 1}}
-              data={classifiedAds}
+              data={filteredAds}
               keyExtractor={item => item.$id}
               renderItem={({item, index}) => (
                 <Pressable style={styles.adContainer} onPress={() => router.push(`/ad-details/${item.$id}`)}>
@@ -114,6 +170,21 @@ const MainPage = () => {
               ListEmptyComponent={<Text>No classified ads yet.</Text>}
               showsVerticalScrollIndicator={false}
             />
+            <View style={styles.filterContainer}>
+                <Dropdown 
+                  style={styles.dropdown}
+                  itemTextStyle={{fontSize: 12}}
+                  dropdownPosition='top' 
+                  data={dropDownData}
+                  labelField={"label"}
+                  valueField={"value"}
+                  placeholder=''
+                  onChange={item => setFilter(item.value)}
+                  renderLeftIcon={() => (<MaterialCommunityIcons style={{ marginLeft: 32 }} name="filter-outline" size={24} color="black" />)}
+                  renderRightIcon={() => null}
+                  renderInputSearch={() => null}
+                />              
+            </View>
           </View>
       )}
     </KeyboardAvoidingView>
@@ -176,5 +247,23 @@ const styles = StyleSheet.create({
   search: {
     marginTop: 25,
     marginBottom: 20
+  },
+  filterContainer: {
+    flex: 1,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'white',
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+    position: "absolute",
+    marginTop: 600,
+  },
+  dropdown: {
+    width: 90,
+    height: 100,
+    justifyContent: 'center'
   }
 })
