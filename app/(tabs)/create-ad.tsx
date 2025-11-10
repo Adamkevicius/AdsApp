@@ -1,3 +1,4 @@
+import AnimatedCircularProgressBar from "@/components/AnimatedCircularProgressBar";
 import ImageCard from "@/components/ImageCard";
 import { BUCKET_ID, CLASSIFIED_ADS_COLLECTION_ID, databases, DB_ID, storage } from "@/lib/appwrite";
 import { useAuth } from "@/lib/auth-context";
@@ -18,6 +19,7 @@ const CreateAdvertisment = () => {
   const [images, setImages] = useState<string[]>([])
   const [contacts, setContacts] = useState<string>("")
   const [error, setError] = useState<string | null>("")
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const { user } = useAuth()
   const router = useRouter()
 
@@ -87,6 +89,7 @@ const CreateAdvertisment = () => {
   }
 
   const handlePost = async () => {
+    setIsLoading(true)
     try {
       if (!user) return
 
@@ -121,6 +124,8 @@ const CreateAdvertisment = () => {
     setPrice("")
     setImages([])
     setContacts("")
+
+    setIsLoading(false)
   }
 
   return (
@@ -128,84 +133,88 @@ const CreateAdvertisment = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >      
-      <View style={[styles.content, styles.shadowProp]}>
-        <TextInput 
-          mode='outlined' 
-          label={"Title"} 
-          style={styles.input}
-          textColor="#000000"
-          outlineColor="#f2efefff"
-          activeOutlineColor='#466145'
-          value={title}
-          onChangeText={setTitle}
-        />
-        
-
-        <TextInput 
-          mode='outlined' 
-          label={"Description"} 
-          textColor="#000000"
-          multiline={true}
-          numberOfLines={8}
-          style={styles.descriptionInput}
-          outlineColor="#f2efefff"
-          activeOutlineColor='#466145'
-          value={description}
-          onChangeText={setDescription}
-        />
-
-        <View style={styles.priceContainer}>
+      {isLoading ? (
+        <AnimatedCircularProgressBar />
+      ) : (
+        <View style={[styles.content, styles.shadowProp]}>
           <TextInput 
             mode='outlined' 
-            label={"Price"} 
+            label={"Title"} 
+            style={styles.input}
             textColor="#000000"
-            style={styles.priceInput}
             outlineColor="#f2efefff"
             activeOutlineColor='#466145'
-            value={price}
-            onChangeText={setPrice}
+            value={title}
+            onChangeText={setTitle}
           />
-          <Dropdown 
-            style={styles.dropdown} 
-            data={currencyData} 
-            labelField={"label"} 
-            valueField={"value"} 
-            placeholder="€" value={currency}
-            onChange={item => setCurrency(item.value)}
+        
+
+          <TextInput 
+            mode='outlined' 
+            label={"Description"} 
+            textColor="#000000"
+            multiline={true}
+            numberOfLines={8}
+            style={styles.descriptionInput}
+            outlineColor="#f2efefff"
+            activeOutlineColor='#466145'
+            value={description}
+            onChangeText={setDescription}
           />
+
+          <View style={styles.priceContainer}>
+            <TextInput 
+              mode='outlined' 
+              label={"Price"} 
+              textColor="#000000"
+              style={styles.priceInput}
+              outlineColor="#f2efefff"
+              activeOutlineColor='#466145'
+              value={price}
+              onChangeText={setPrice}
+            />
+            <Dropdown 
+              style={styles.dropdown} 
+              data={currencyData} 
+              labelField={"label"} 
+              valueField={"value"} 
+              placeholder="€" value={currency}
+              onChange={item => setCurrency(item.value)}
+            />
+          </View>
+
+          {images ? (
+            <ScrollView
+            style={styles.imagesContainer}
+              showsHorizontalScrollIndicator={false}
+              horizontal={true}
+            >
+              {images.map((uri, index) => (
+                <ImageCard key={index} uri={uri} />
+              ))}
+            </ScrollView>
+          ) : (
+            <Text style={styles.error}> {error} </Text>
+          )}
+
+          <Button mode="text" textColor="#000000" style={images.length === 0 ? {marginTop: -33} : {marginTop: 0}} onPress={pickImage}>
+            Choose image
+          </Button>
+
+          <TextInput 
+            mode='outlined' 
+            label={"Contacts"} 
+            style={[styles.input, {marginTop: 25}]}
+            textColor="#000000"
+            outlineColor="#f2efefff"
+            activeOutlineColor='#466145'
+            value={contacts}
+            onChangeText={setContacts}
+          />
+
+          <Button mode='contained' textColor="#FDFDFB" style={styles.button} onPress={handlePost}>Post</Button>    
         </View>
-
-        {images ? (
-          <ScrollView
-          style={styles.imagesContainer}
-            showsHorizontalScrollIndicator={false}
-            horizontal={true}
-          >
-            {images.map((uri, index) => (
-              <ImageCard key={index} uri={uri} />
-            ))}
-          </ScrollView>
-        ) : (
-          <Text style={styles.error}> {error} </Text>
-        )}
-
-        <Button mode="text" textColor="#000000" style={images.length === 0 ? {marginTop: -33} : {marginTop: 0}} onPress={pickImage}>
-          Choose image
-        </Button>
-
-        <TextInput 
-          mode='outlined' 
-          label={"Contacts"} 
-          style={[styles.input, {marginTop: 25}]}
-          textColor="#000000"
-          outlineColor="#f2efefff"
-          activeOutlineColor='#466145'
-          value={contacts}
-          onChangeText={setContacts}
-        />
-
-        <Button mode='contained' textColor="#FDFDFB" style={styles.button} onPress={handlePost}>Post</Button>    
-      </View>
+      )}
     </KeyboardAvoidingView>
   )
 }

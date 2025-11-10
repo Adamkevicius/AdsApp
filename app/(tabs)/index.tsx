@@ -1,3 +1,4 @@
+import AnimatedCircularProgressBar from '@/components/AnimatedCircularProgressBar'
 import { BUCKET_ID, CLASSIFIED_ADS_COLLECTION_ID, client, databases, DB_ID, RealTimeResponse, storage } from '@/lib/appwrite'
 import { useAuth } from '@/lib/auth-context'
 import { ClassifiedAds } from '@/types/database.type'
@@ -11,32 +12,42 @@ const MainPage = () => {
   const [classifiedAds, setClassifiedAds] = useState<ClassifiedAds[]>([])
   const [classifiedAdsImages, setClassifiedAdsImages] = useState<string[]>([])
   const [search, setSearch] = useState<string>("")
+  const [isLoading, setIsLoading] = useState<boolean>(true)
   const { user } = useAuth()
 
   useEffect(() => {
-    if (user) {
-      const channel = `databases.${DB_ID}.collections.${CLASSIFIED_ADS_COLLECTION_ID}.documents`
-      const subscription = client.subscribe(
-        channel,
-        (response: RealTimeResponse) => {
-          if (response.events.includes("databases.*.collections.*.documents.*.create")) {
-            fetchClassifiedAds()
+    const init = async () => {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      if (user) {
+        const channel = `databases.${DB_ID}.collections.${CLASSIFIED_ADS_COLLECTION_ID}.documents`
+        const subscription = client.subscribe(
+          channel,
+          (response: RealTimeResponse) => {
+            if (response.events.includes("databases.*.collections.*.documents.*.create")) {
+              fetchClassifiedAds()
+            }
+            else if (response.events.includes("databases.*.collections.*.documents.*.update")) {
+              fetchClassifiedAds()
+            }
+            else if (response.events.includes("databases.*.collections.*.documents.*.delete")) {
+              fetchClassifiedAds()
+            }
           }
-          else if (response.events.includes("databases.*.collections.*.documents.*.update")) {
-            fetchClassifiedAds()
-          }
-          else if (response.events.includes("databases.*.collections.*.documents.*.delete")) {
-            fetchClassifiedAds()
-          }
+        )
+
+       fetchClassifiedAds()
+
+       
+
+       return () => {
+          subscription()
         }
-      )
-
-      fetchClassifiedAds()
-
-      return () => {
-        subscription()
       }
     }
+
+    init()
+    
   }, [user])
 
 
@@ -51,6 +62,8 @@ const MainPage = () => {
       const fetchedImages = await fetchImages(firstImageId)
 
       setClassifiedAdsImages(fetchedImages)
+
+      setIsLoading(false)
     } catch (error) {
       console.log(error)
     }
@@ -74,30 +87,38 @@ const MainPage = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <Searchbar placeholder='Search' style={styles.search} onChangeText={setSearch} value={search} />
-      <FlatList 
-        style={{ flex: 1, paddingVertical: 25}}
-        data={classifiedAds}
-        keyExtractor={item => item.$id}
-        renderItem={({item, index}) => (
-          <Pressable style={styles.adContainer} onPress={() => router.push(`/ad-details/${item.$id}`)}>
-            <Image style={styles.image} 
-              source={
-                classifiedAdsImages[index]
-                  ? { uri: classifiedAdsImages[index] }
-                  : require('../../assets/images/empty-image.jpg')
-              }
+      { isLoading ? (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+            <AnimatedCircularProgressBar />
+          </View>
+      ) : (
+          <View style={{ height: "100%"}}>
+            <Searchbar placeholder='Search' style={styles.search} onChangeText={setSearch} value={search} />
+            <FlatList 
+              style={{ flex: 1, paddingVertical: 25}}
+              data={classifiedAds}
+              keyExtractor={item => item.$id}
+              renderItem={({item, index}) => (
+                <Pressable style={styles.adContainer} onPress={() => router.push(`/ad-details/${item.$id}`)}>
+                  <Image style={styles.image} 
+                    source={
+                      classifiedAdsImages[index]
+                        ? { uri: classifiedAdsImages[index] }
+                        : require('../../assets/images/empty-image.jpg')
+                    }
+                  />
+                  <View style={styles.textContainer}>
+                    <Text style={styles.title}> {item.title} </Text>
+                    <Text style={styles.price}> {item.price} </Text>
+                    <MaterialIcons style={styles.arrow} name="arrow-forward-ios" size={24} color="black" />
+                  </View>
+                </Pressable>
+              )}
+              ListEmptyComponent={<Text>No classified ads yet.</Text>}
+              showsVerticalScrollIndicator={false}
             />
-            <View style={styles.textContainer}>
-              <Text style={styles.title}> {item.title} </Text>
-              <Text style={styles.price}> {item.price} </Text>
-              <MaterialIcons style={styles.arrow} name="arrow-forward-ios" size={24} color="black" />
-            </View>
-          </Pressable>
-        )}
-        ListEmptyComponent={<Text>No classified ads yet.</Text>}
-        showsVerticalScrollIndicator={false}
-      />
+          </View>
+      )}
     </KeyboardAvoidingView>
   )
 }
