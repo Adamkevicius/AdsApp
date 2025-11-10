@@ -227,13 +227,10 @@ const ClassifiedAdsDetails = ({ id }: props) => {
     }
 
     const exitEditing = () => {
-        if (temporaryDeletedImages.length === 0) {
-            setEditable(false)
-        }
-        else {
-            fetchClassifiedAd()
-            setEditable(false)
-        }
+        fetchClassifiedAd()
+        setOnDelete(false)
+        setEditable(false)
+
     }
 
     const getImageIdFromUrl = (url: string) => {
@@ -255,29 +252,33 @@ const ClassifiedAdsDetails = ({ id }: props) => {
             <View >
                 <TextInput style={styles.title} editable={editable} value={title} onChangeText={setTitle}/>
                 <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} >
-                    {images.map((image, key) => (
-                        <View key={key}>
-                            {editable ? (
-                                <Pressable onPress={() => deleteImage(image)}>
-                                    <MaterialCommunityIcons style={styles.deleteImageButton} name="close-circle-outline" size={24} color="black" />
-                                </Pressable>
-                            ) : (<></>)}
-                            <Image 
-                                style={
-                                    [
-                                        styles.image, 
-                                        editable ? { marginTop: -15} : {marginTop: 0}, 
-                                        totalNumberOfImages === 5 ? { marginBottom: 25} : { marginBottom: 0}
-                                    ]
-                                }  
-                                key={key} 
-                                source={{ uri: image}}/>
-                        </View>
-                    ))}
+                    { images.length === 0 ? (
+                        <Image style={styles.image} source={require("../assets/images/empty-image.jpg")}/>
+                    ) : (
+                        images.map((image, key) => (
+                             <View key={key}>
+                                {editable ? (
+                                     <Pressable onPress={() => deleteImage(image)}>
+                                       <MaterialCommunityIcons style={styles.deleteImageButton} name="close-circle-outline" size={24} color="black" />
+                                    </Pressable>
+                                ) : (<></>)}
+                                    <Image 
+                                        style={
+                                        [
+                                            styles.image, 
+                                            editable ? { marginTop: -15} : {marginTop: 0}, 
+                                            totalNumberOfImages === 5 ? { marginBottom: 25} : { marginBottom: 0}
+                                        ]
+                                    }  
+                                    key={key} 
+                                    source={{ uri: image }}/>
+                            </View>
+                            ))
+                    )}
                 </ScrollView>
-                {editable && totalNumberOfImages < 5 && !onDelete ? (
+                {editable && totalNumberOfImages < 5 && !onDelete && (
                     <Button style={{ marginTop: 5}} mode='text' textColor='black' onPress={addImage}>Add Image</Button>
-                ) : (<></>)}
+                )}
             </View>
 
             <TextInput style={[styles.price, !editable ? {marginTop: 25} : {marginTop: 0}]} editable={editable} value={price} onChangeText={setPrice}/>

@@ -38,8 +38,6 @@ const MainPage = () => {
 
        fetchClassifiedAds()
 
-       
-
        return () => {
           subscription()
         }
@@ -95,18 +93,17 @@ const MainPage = () => {
           <View style={{ height: "100%"}}>
             <Searchbar placeholder='Search' style={styles.search} onChangeText={setSearch} value={search} />
             <FlatList 
-              style={{ flex: 1, paddingVertical: 25}}
+              style={{ flex: 1}}
               data={classifiedAds}
               keyExtractor={item => item.$id}
               renderItem={({item, index}) => (
                 <Pressable style={styles.adContainer} onPress={() => router.push(`/ad-details/${item.$id}`)}>
-                  <Image style={styles.image} 
-                    source={
-                      classifiedAdsImages[index]
-                        ? { uri: classifiedAdsImages[index] }
-                        : require('../../assets/images/empty-image.jpg')
-                    }
+                  { item.images.length === 0 ? (
+                    <Image style={styles.image} source={require('../../assets/images/empty-image.jpg')} />
+                  ) : (
+                    <Image style={styles.image} source={ { uri: classifiedAdsImages[index] } }
                   />
+                  )}
                   <View style={styles.textContainer}>
                     <Text style={styles.title}> {item.title} </Text>
                     <Text style={styles.price}> {item.price} </Text>
@@ -178,6 +175,6 @@ const styles = StyleSheet.create({
   },
   search: {
     marginTop: 25,
-    marginBottom: 10
+    marginBottom: 20
   }
 })
