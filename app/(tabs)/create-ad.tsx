@@ -103,7 +103,7 @@ const CreateAdvertisment = () => {
           user_id: user.$id,
           title,
           description,
-          price: price + currency,
+          price: price + " " + currency,
           images: imagesIds,
           contacts: contacts
         }
@@ -146,6 +146,7 @@ const CreateAdvertisment = () => {
             activeOutlineColor='#466145'
             value={title}
             onChangeText={setTitle}
+            maxLength={15}
           />
         
 
