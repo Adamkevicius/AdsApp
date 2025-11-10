@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react'
 import { Alert, Image, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native'
 import { ID } from 'react-native-appwrite'
 import { Button } from 'react-native-paper'
+import AnimatedCircularProgressBar from './AnimatedCircularProgressBar'
 
 type props = {
     id: string
@@ -35,11 +36,19 @@ const ClassifiedAdsDetails = ({ id }: props) => {
     const [temporaryDeletedImages ,setTemporaryDeletedImages] = useState<string[]>([])
     const [imagesIdsToDelete, setImagesIdsToDelete] = useState<string[]>([])
     const [onDelete, setOnDelete] = useState<boolean>(false)
+    const [isLoading, setIsLoading] = useState<boolean>(true)
     const { user } = useAuth()
     const router = useRouter()
 
     useEffect(() => {
-        fetchClassifiedAd()
+        const init = async () => {
+            await new Promise(resolve => setTimeout(resolve, 1500))
+
+            fetchClassifiedAd()
+        }
+
+        init()
+
     }, [])
 
     const fetchClassifiedAd = async () => {
@@ -69,6 +78,8 @@ const ClassifiedAdsDetails = ({ id }: props) => {
 
         setImagesIds(imagesIds)
         setImages(fetchedImages)
+
+        setIsLoading(false)
         } catch (error) {
             console.log(error)
         }
@@ -136,6 +147,7 @@ const ClassifiedAdsDetails = ({ id }: props) => {
      }
 
     const updateClassifiedAdDetails = async () => {
+        setIsLoading(true)
         try {
 
             const imagesIds: string[] = (await storeNewImages() ?? [])
@@ -164,6 +176,7 @@ const ClassifiedAdsDetails = ({ id }: props) => {
             )
 
             setEditable(false)
+            setIsLoading(false)
         } catch (error) {
             console.log("Error was occured while updating details ", error)
         }
@@ -235,54 +248,58 @@ const ClassifiedAdsDetails = ({ id }: props) => {
 
   return (
     <View style={styles.container}>
-      <TextInput style={styles.title} editable={editable} value={title} onChangeText={setTitle}/>
-      <View >
-        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} >
-            {images.map((image, key) => (
-                <View key={key}>
-                    {editable ? (
-                        <Pressable onPress={() => deleteImage(image)}>
-                            <MaterialCommunityIcons style={styles.deleteImageButton} name="close-circle-outline" size={24} color="black" />
-                        </Pressable>
-                    ) : (<></>)}
-                    <Image 
-                        style={
-                            [
-                                styles.image, 
-                                editable ? { marginTop: -15} : {marginTop: 0}, 
-                                totalNumberOfImages === 5 ? { marginBottom: 25} : { marginBottom: 0}
-                            ]
-                        }  
-                        key={key} 
-                        source={{ uri: image}}/>
-                </View>
-            ))}
-        </ScrollView>
-        {editable && totalNumberOfImages < 5 && !onDelete ? (
-            <Button style={{ marginTop: 5}} mode='text' textColor='black' onPress={addImage}>Add Image</Button>
-        ) : (<></>)}
-      </View>
+      { isLoading ? (
+        <AnimatedCircularProgressBar />
+      ) : (
+        <View>
+            <View >
+                <TextInput style={styles.title} editable={editable} value={title} onChangeText={setTitle}/>
+                <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} >
+                    {images.map((image, key) => (
+                        <View key={key}>
+                            {editable ? (
+                                <Pressable onPress={() => deleteImage(image)}>
+                                    <MaterialCommunityIcons style={styles.deleteImageButton} name="close-circle-outline" size={24} color="black" />
+                                </Pressable>
+                            ) : (<></>)}
+                            <Image 
+                                style={
+                                    [
+                                        styles.image, 
+                                        editable ? { marginTop: -15} : {marginTop: 0}, 
+                                        totalNumberOfImages === 5 ? { marginBottom: 25} : { marginBottom: 0}
+                                    ]
+                                }  
+                                key={key} 
+                                source={{ uri: image}}/>
+                        </View>
+                    ))}
+                </ScrollView>
+                {editable && totalNumberOfImages < 5 && !onDelete ? (
+                    <Button style={{ marginTop: 5}} mode='text' textColor='black' onPress={addImage}>Add Image</Button>
+                ) : (<></>)}
+            </View>
 
-      <TextInput style={[styles.price, !editable ? {marginTop: 25} : {marginTop: 0}]} editable={editable} value={price} onChangeText={setPrice}/>
-      <TextInput style={styles.contacts} editable={editable} value={contacts} onChangeText={setContacts}/>
-      <TextInput style={styles.description} multiline={true} editable={editable} value={description} onChangeText={setDescription}/>
-      {userId === user?.$id && (
-        <View >
-            {!editable ? (
-                <View style={styles.buttonContainer}>
-                    <Button style={styles.editButton} mode='contained' textColor="#FDFDFB" onPress={() => setEditable(true)}>Edit</Button>
-                    <Button style={styles.deleteButton} mode='contained' textColor="#FDFDFB" onPress={deleteClassifiedAd}>Delete</Button>
-                </View>
-            ) : (
-                <View style={styles.buttonContainer}>
-                    <Button style={styles.saveButton} mode='contained' textColor="#FDFDFB" onPress={updateClassifiedAdDetails}>Save</Button>
-                    <Button style={styles.exitButton} mode='contained' textColor="#FDFDFB" onPress={exitEditing}>X</Button>
+            <TextInput style={[styles.price, !editable ? {marginTop: 25} : {marginTop: 0}]} editable={editable} value={price} onChangeText={setPrice}/>
+            <TextInput style={styles.contacts} editable={editable} value={contacts} onChangeText={setContacts}/>
+            <TextInput style={styles.description} multiline={true} editable={editable} value={description} onChangeText={setDescription}/>
+            {userId === user?.$id && (
+                <View >
+                    {!editable ? (
+                        <View style={styles.buttonContainer}>
+                            <Button style={styles.editButton} mode='contained' textColor="#FDFDFB" onPress={() => setEditable(true)}>Edit</Button>
+                            <Button style={styles.deleteButton} mode='contained' textColor="#FDFDFB" onPress={deleteClassifiedAd}>Delete</Button>
+                        </View>
+                    ) : (
+                        <View style={styles.buttonContainer}>
+                            <Button style={styles.saveButton} mode='contained' textColor="#FDFDFB" onPress={updateClassifiedAdDetails}>Save</Button>
+                            <Button style={styles.exitButton} mode='contained' textColor="#FDFDFB" onPress={exitEditing}>X</Button>
+                        </View>
+                    )}
                 </View>
             )}
-        </View>
+      </View>
       )}
-
-      
     </View>
   )
 }
