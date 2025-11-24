@@ -1,6 +1,6 @@
 <div>
    <div>
-      <h2> 📌 Classified Ads App </h2>
+      <h1> 📌 Classified Ads App </h2>
       <p> A cross-platform mobile application for posting and browsing classified advertisments, 
          developed as my project for the Cross-Platform Mobile Apps subject at college. The app built
          with React Native and TypeScript, using Appwrite BaaS for backend services.
