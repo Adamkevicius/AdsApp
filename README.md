@@ -1,50 +1,44 @@
-# Welcome to your Expo app 👋
-
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
-
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+<div>
+   <div>
+      <h2> 📌 Classified Ads App </h2>
+      <p> A cross-platform mobile application for posting and browsing classified advertisments, 
+         developed as my project for the Cross-Platform Mobile Apps subject at college. The app built
+         with React Native and TypeScript, using Appwrite BaaS for backend services.
+      </p>
+   </div>
+   <div>
+      <h2> Features </h2>
+      <ul>
+         <li> Post Ads </li>
+         <li> Browse Ads in Real-Time </li>
+         <li> Filter Ads: </li>
+         <p> By newest, oldest, your ads or all ads </p>
+         <li> Search Ads by Name </li>
+         <li> Edit Posted Ads </li>
+      </ul>
+   </div>
+   <h2> App Screenshots: </h2>
+   <div>
+      <h3> Authentication Screens </h3>
+      <p>
+         <img width="300" height="600" alt="Simulator Screenshot - iPhone 16e - 2025-11-24 at 11 25 53" src="https://github.com/user-attachments/assets/52e180ea-7a5d-4325-8e02-950861741135" />
+         <img width="300" height="600" alt="Simulator Screenshot - iPhone 16e - 2025-11-24 at 11 25 56" src="https://github.com/user-attachments/assets/a3aac6a2-1772-44c0-af03-d947a1fbaf28" />
+      </p>
+      <h3> Custom Loading Screen </h3>
+      <p> <img width="300" height="600" alt="Simulator Screenshot - iPhone 16e - 2025-11-24 at 11 25 29" src="https://github.com/user-attachments/assets/d1fa87a1-0c66-4db3-953c-84bf277747d8" /> </p>
+      <h3> Advertisments Screen </3>
+      <p>
+         <img width="300" height="600" alt="Simulator Screenshot - iPhone 16e - 2025-11-24 at 11 26 20" src="https://github.com/user-attachments/assets/06666ecd-e552-4676-9c2e-d550b81b96de" />
+         <img width="300" height="600" alt="Simulator Screenshot - iPhone 16e - 2025-11-24 at 11 26 55" src="https://github.com/user-attachments/assets/1d0ee675-4e0c-4466-bc69-4f5b5a513e14" />
+         <img width="300" height="600" alt="Simulator Screenshot - iPhone 16e - 2025-11-24 at 11 27 19" src="https://github.com/user-attachments/assets/26b26b31-7725-4978-b0c3-4628f507569f" />
+      </p>
+      <h3> Post an Add Screen </3>
+      <p> <img width="300" height="600" alt="Simulator Screenshot - iPhone 16e - 2025-11-24 at 11 27 31" src="https://github.com/user-attachments/assets/a4054457-fbd8-4e98-b804-edcde5ae1777" /> </p>
+      <h3>Advertisment Editing Screen </3>
+      <p>
+         <img width="300" height="600" alt="Simulator Screenshot - iPhone 16e - 2025-11-24 at 11 27 42" src="https://github.com/user-attachments/assets/e216b6c9-882b-4f94-b171-b92c011d7d38" />
+         <img width="300" height="600" alt="Simulator Screenshot - iPhone 16e - 2025-11-24 at 11 27 56" src="https://github.com/user-attachments/assets/83f005ef-7f48-4025-9681-65316ea835c3" />
+         <img width="300" height="600" alt="Simulator Screenshot - iPhone 16e - 2025-11-24 at 11 28 00" src="https://github.com/user-attachments/assets/6feac39d-a612-4d50-9ac8-32f7898f4d0b" />
+      </p>
+   </div>
+</div>
